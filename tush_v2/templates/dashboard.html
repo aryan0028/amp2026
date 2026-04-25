@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <p style="color: var(--text-secondary); margin-bottom: 0.25rem;">Welcome back, Admin</p>
+        <h1 style="font-size: 2rem;">Sabha Dashboard</h1>
+    </div>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+        <input type="month" id="monthFilter" value="{{ current_month or '2026-04' }}" class="month-selector">
+        <button class="btn btn-primary" onclick="exportFullReport()">
+            <i class="fas fa-file-export"></i> Download Report
+        </button>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="glass-card stat-item">
+        <span class="stat-label">Total Monthly Income</span>
+        <span class="stat-value" id="totalIncome">₹0.00</span>
+    </div>
+    <div class="glass-card stat-item">
+        <span class="stat-label">Total Monthly Expenses</span>
+        <span class="stat-value" id="totalExpenses">₹0.00</span>
+    </div>
+    <div class="glass-card stat-item">
+        <span class="stat-label">Net Balance</span>
+        <span class="stat-value" id="netBalance">₹0.00</span>
+    </div>
+    <div class="glass-card stat-item">
+        <span class="stat-label">Average Attendance</span>
+        <span class="stat-value" id="avgAttendance">0</span>
+    </div>
+</div>
+
+<div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+    <div class="glass-card">
+        <h3 style="margin-bottom: 1.5rem;">Income vs Expense</h3>
+        <canvas id="incomeExpenseChart"></canvas>
+    </div>
+    <div class="glass-card">
+        <h3 style="margin-bottom: 1.5rem;">Prasadi Analysis</h3>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <div style="flex: 1;">
+                <span class="stat-label" style="font-size: 0.75rem;">Total Prasadi</span>
+                <div id="prasadiTotal" style="font-size: 1.5rem; font-weight: 600;">₹0</div>
+            </div>
+            <div style="flex: 1;">
+                <span class="stat-label" style="font-size: 0.75rem;">Weekly Avg</span>
+                <div id="prasadiAvg" style="font-size: 1.5rem; font-weight: 600;">₹0</div>
+            </div>
+        </div>
+        <canvas id="prasadiChart"></canvas>
+    </div>
+</div>
+
+<style>
+    .month-selector {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

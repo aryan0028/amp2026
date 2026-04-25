@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="header-actions">
+    <h1>Expense Tracking</h1>
+    <div style="display: flex; gap: 1rem;">
+        <input type="month" id="expenseMonth" value="{{ current_month }}" onchange="filterExpenses(this.value)">
+        <button class="btn btn-primary" onclick="toggleExpenseForm()"><i class="fas fa-plus"></i> Add Expense</button>
+    </div>
+</div>
+
+<div id="expenseForm" class="glass-card mb-4" style="display: none; margin-bottom: 2rem;">
+    <h3>Add New Expense</h3>
+    <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div class="form-group">
+            <label>Description</label>
+            <input type="text" name="description" required placeholder="e.g. Saturday Prasadi">
+        </div>
+        <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" step="0.01" name="amount" required placeholder="0.00">
+        </div>
+        <div class="form-group">
+            <label>Date</label>
+            <input type="date" name="date" required value="{{ today }}">
+        </div>
+        <div class="form-group">
+            <label>Category</label>
+            <select name="category">
+                <option value="Prasadi">Prasadi (Saturday)</option>
+                <option value="Other">Other Expense</option>
+            </select>
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 1rem;">
+            <button type="button" class="btn" onclick="toggleExpenseForm()" style="background: rgba(255,255,255,0.05);">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Expense</button>
+        </div>
+    </form>
+</div>
+
+<div class="glass-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Amount (₹)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record.date.strftime('%d-%m-%Y') }}</td>
+                <td>{{ record.description }}</td>
+                <td><span class="badge {{ 'prasadi' if record.category == 'Prasadi' else 'other' }}">{{ record.category }}</span></td>
+                <td class="amount expense">₹{{ "%.2f"|format(record.amount) }}</td>
+                <td>
+                    <button class="icon-btn danger" onclick="deleteRecord('expense', {{ record.id }})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-secondary);">No expenses found for this month.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { text-align: left; padding: 1rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); }
+    .data-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); }
+    .amount.expense { color: var(--danger); font-weight: 600; }
+    .badge.prasadi { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .badge.other { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+</style>
+{% endblock %}

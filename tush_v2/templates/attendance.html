@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="header-actions">
+    <h1>Sabha Attendance</h1>
+    <div style="display: flex; gap: 1rem;">
+        <input type="month" id="attendanceMonth" value="{{ current_month }}" onchange="filterAttendance(this.value)">
+        <button class="btn btn-primary" onclick="toggleAttendanceForm()"><i class="fas fa-plus"></i> Record Attendance</button>
+    </div>
+</div>
+
+<div id="attendanceForm" class="glass-card mb-4" style="display: none; margin-bottom: 2rem;">
+    <h3>Record Weekly Attendance</h3>
+    <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div class="form-group">
+            <label>Attendee Count</label>
+            <input type="number" name="count" required placeholder="0">
+        </div>
+        <div class="form-group">
+            <label>Date (Saturday)</label>
+            <input type="date" name="date" required value="{{ today }}">
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 1rem;">
+            <button type="button" class="btn" onclick="toggleAttendanceForm()" style="background: rgba(255,255,255,0.05);">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Attendance</button>
+        </div>
+    </form>
+</div>
+
+<div class="glass-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Attendee Count</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record.date.strftime('%d-%m-%Y') }} ({{ record.date.strftime('%A') }})</td>
+                <td style="font-weight: 700; font-size: 1.1rem; color: var(--accent-primary);">{{ record.count }}</td>
+                <td>
+                    <button class="icon-btn danger" onclick="deleteRecord('attendance', {{ record.id }})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 3rem; color: var(--text-secondary);">No attendance records for this month.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { text-align: left; padding: 1rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); }
+    .data-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); }
+</style>
+{% endblock %}

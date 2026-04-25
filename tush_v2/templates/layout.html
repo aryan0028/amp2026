@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sabha Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-logo"><i class="fas fa-church"></i> SabhaAdmin</a>
+            <div class="nav-links">
+                <a href="/" class="{{ 'active' if request.path == '/' else '' }}"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="/members" class="{{ 'active' if '/members' in request.path else '' }}"><i class="fas fa-id-card"></i> Members</a>
+                <a href="/donations" class="{{ 'active' if '/donations' in request.path else '' }}"><i class="fas fa-hand-holding-heart"></i> Donations</a>
+                <a href="/expenses" class="{{ 'active' if '/expenses' in request.path else '' }}"><i class="fas fa-wallet"></i> Expenses</a>
+                <a href="/attendance/members" class="{{ 'active' if '/attendance' in request.path else '' }}"><i class="fas fa-clipboard-check"></i> Attendance</a>
+                <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="dashboard-container">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="alerts">
+              {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        const menuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.querySelector('.nav-links');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="header-actions">
+    <div>
+        <h1><i class="fas fa-clipboard-check" style="color:var(--accent-primary);"></i> Member Attendance</h1>
+        <p style="color:var(--text-secondary); margin-top:0.25rem;">Mark present/absent for each member per session</p>
+    </div>
+    <div style="display:flex; gap:1rem; align-items:center;">
+        <input type="month" value="{{ current_month }}" onchange="window.location='/attendance/members?month='+this.value" style="background:var(--bg-secondary);border:1px solid var(--border-color);color:white;padding:0.5rem 1rem;border-radius:0.5rem;">
+        <button class="btn btn-primary" onclick="toggleForm('markForm')"><i class="fas fa-plus"></i> Mark Attendance</button>
+    </div>
+</div>
+
+<!-- Mark Attendance Form -->
+<div id="markForm" class="glass-card" style="display:none; margin-bottom:2rem;">
+    <h3>Mark Attendance</h3>
+    <form method="POST" action="/attendance/members/mark" style="margin-top:1rem;">
+        <div style="display:flex; gap:1rem; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap;">
+            <div class="form-group" style="flex:1; min-width:180px;">
+                <label>Session Date (Saturday)</label>
+                <input type="date" name="date" required value="{{ today }}">
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:flex-end; padding-bottom:0.1rem;">
+                <button type="button" class="btn" onclick="selectAll()" style="background:rgba(16,185,129,0.15); color:var(--success);">Select All</button>
+                <button type="button" class="btn" onclick="clearAll()" style="background:rgba(239,68,68,0.1); color:var(--danger);">Clear All</button>
+            </div>
+        </div>
+        {% for m in members %}
+        <input type="hidden" name="member_ids" value="{{ m.id }}">
+        {% endfor %}
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:0.75rem; margin-bottom:1.5rem;">
+            {% for m in members %}
+            <label style="display:flex; align-items:center; gap:0.75rem; background:var(--bg-secondary); padding:0.75rem 1rem; border-radius:0.75rem; cursor:pointer; border:1px solid var(--border-color); transition:border-color 0.2s;">
+                <input type="checkbox" name="present" value="{{ m.id }}" class="member-check" style="width:18px;height:18px;accent-color:var(--success);" checked>
+                <span style="font-weight:500;">{{ m.name }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:1rem;">
+            <button type="button" class="btn" onclick="toggleForm('markForm')" style="background:rgba(255,255,255,0.05);">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Attendance</button>
+        </div>
+    </form>
+</div>
+
+<!-- Attendance History Table -->
+{% if dates %}
+<div class="glass-card" style="overflow-x:auto;">
+    <h3 style="margin-bottom:1.5rem;">Attendance Record — {{ current_month }}</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Member</th>
+                {% for d in dates %}
+                <th style="text-align:center;">{{ d.strftime('%d %b') }}<br><span style="font-size:0.7rem; color:var(--text-secondary);">{{ d.strftime('%a') }}</span></th>
+                {% endfor %}
+                <th style="text-align:center;">Present</th>
+                <th style="text-align:center;">Absent</th>
+                <th style="text-align:center;">%</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in members %}
+            {% set present_count = namespace(val=0) %}
+            <tr>
+                <td style="font-weight:600; white-space:nowrap;">{{ m.name }}</td>
+                {% for d in dates %}
+                    {% set status = att_map.get(m.id, {}).get(d, None) %}
+                    {% if status == 'present' %}
+                        {% set present_count.val = present_count.val + 1 %}
+                        <td style="text-align:center;"><span style="color:var(--success); font-size:1.1rem;">✓</span></td>
+                    {% elif status == 'absent' %}
+                        <td style="text-align:center;"><span style="color:var(--danger); font-size:1.1rem;">✗</span></td>
+                    {% else %}
+                        <td style="text-align:center; color:var(--text-secondary);">—</td>
+                    {% endif %}
+                {% endfor %}
+                <td style="text-align:center; color:var(--success); font-weight:700;">{{ present_count.val }}</td>
+                <td style="text-align:center; color:var(--danger); font-weight:700;">{{ dates|length - present_count.val }}</td>
+                <td style="text-align:center;">
+                    {% if dates|length > 0 %}
+                    <span style="background:rgba(99,102,241,0.15); color:var(--accent-primary); padding:0.2rem 0.5rem; border-radius:1rem; font-size:0.8rem; font-weight:600;">
+                        {{ ((present_count.val / dates|length) * 100)|round|int }}%
+                    </span>
+                    {% else %}—{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="glass-card" style="text-align:center; padding:3rem; color:var(--text-secondary);">
+    <i class="fas fa-clipboard" style="font-size:3rem; margin-bottom:1rem; opacity:0.3;"></i>
+    <p>No attendance records for {{ current_month }}. Click "Mark Attendance" to get started.</p>
+</div>
+{% endif %}
+
+<style>
+.header-actions { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
+.data-table { width:100%; border-collapse:collapse; }
+.data-table th { text-align:left; padding:0.75rem 1rem; color:var(--text-secondary); border-bottom:1px solid var(--border-color); font-size:0.78rem; text-transform:uppercase; white-space:nowrap; }
+.data-table td { padding:0.75rem 1rem; border-bottom:1px solid var(--border-color); }
+.form-group { display:flex; flex-direction:column; gap:0.4rem; }
+.form-group label { font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; }
+.form-group input { background:var(--bg-secondary); border:1px solid var(--border-color); color:white; padding:0.6rem 0.9rem; border-radius:0.5rem; }
+</style>
+
+<script>
+function toggleForm(id) {
+    const el = document.getElementById(id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function selectAll() {
+    document.querySelectorAll('.member-check').forEach(c => c.checked = true);
+}
+function clearAll() {
+    document.querySelectorAll('.member-check').forEach(c => c.checked = false);
+}
+</script>
+{% endblock %}
