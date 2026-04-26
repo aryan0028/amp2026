@@ -34,6 +34,7 @@ with app.app_context():
                 os.makedirs('instance')
             except:
                 pass
+                 db.drop_all() 
     db.create_all()
     if not User.query.filter_by(username='admin').first():
         admin = User(username='admin', password=generate_password_hash('admin123'))
